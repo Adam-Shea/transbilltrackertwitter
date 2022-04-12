@@ -1,19 +1,18 @@
+require('dotenv').config()
 const TwitterApi = require('twitter-api-v2').default;
 const axios = require('axios'); //Make rest requests
 const fs = require('fs'); //Read files
-const client = new TwitterApi({
-    appKey: "",
-    appSecret: "",
-    accessToken: "",
-    accessSecret: "",
-});
 
-const apiKey = "" //Api Key
+const client = new TwitterApi({
+    appKey: process.env.APP_KEY,
+    appSecret: process.env.APP_SECRET,
+    accessToken: process.env.ACCESS_TOKEN,
+    accessSecret: process.env.ACCESS_SECRET,
+});
+const apiKey = process.env.API_KEY
 
 scrapeData();
 setInterval(function () { scrapeData() }, 20 * 60000)
-
-
 
 function scrapeData() {
     console.log("Starting scrape")

@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.26.1",
+    "dotenv": "^16.0.0",
     "twitter-api-v2": "^1.11.3"
   }
 }
