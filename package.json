@@ -1,17 +1,17 @@
 {
-  "name": "transtwitterbot",
-  "version": "1.0.0",
-  "description": "Pull data from legiscan about trans bills and tweets about them",
-  "main": "index.js",
-  "scripts": {
-    "dev": "node index.js"
-  },
-  "author": "Adam Shea",
-  "license": "MIT",
-  "dependencies": {
-    "axios": "^0.26.1",
-    "dotenv": "^16.0.0",
-    "fast-csv": "^4.3.6",
-    "twitter-api-v2": "^1.11.3"
-  }
+	"name": "transtwitterbot",
+	"version": "1.0.0",
+	"description": "Pull data from legiscan about trans bills and tweets about them",
+	"main": "index.js",
+	"scripts": {
+		"dev": "node index.js"
+	},
+	"author": "Adam Shea",
+	"license": "MIT",
+	"dependencies": {
+		"axios": "^0.26.1",
+		"dotenv": "^16.0.0",
+		"google-spreadsheet": "^3.2.0",
+		"twitter-api-v2": "^1.11.3"
+	}
 }
