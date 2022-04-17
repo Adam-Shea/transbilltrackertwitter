@@ -12,3 +12,10 @@ const client = new TwitterApi({
 export function sendTweet(data: string[]) {
     client.readWrite.v1.tweetThread(data);
 }
+
+export function sendMessage(id: number, message: string) {
+    client.v1.sendDm({
+        recipient_id: id,
+        text: message,
+    });
+}

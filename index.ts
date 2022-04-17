@@ -17,7 +17,7 @@ import {
     addGoogleSheetsRow,
 } from './src/sheets';
 import { chunkSubstr, getItemInArray } from './src/utility';
-import { sendTweet } from './src/twitter';
+import { sendTweet, sendMessage } from './src/twitter';
 
 let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to save on api requests
 
@@ -211,9 +211,16 @@ async function processBill(bill_id: number) {
     tweetData.push(
         `${legislature.House}\n${legislature.Senate}\n${legislature.Governor}\n${legislature['Representative Contact Link']}`,
     );
+
     tweetData.push(link);
+
+    if (currentBill.description != "" && currentBill.category != "") {
+        sendTweet(tweetData);
+    } else {
+        //sendMessage(, "test")
+    }
+
     console.log(tweetData);
-    sendTweet(tweetData);
 }
 
 //Update data.json from google sheets
