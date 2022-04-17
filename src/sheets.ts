@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { GoogleSpreadsheet } = require('google-spreadsheet'); //Google Spreadsheet
-import { watchListSheet } from "./types";
+import { watchListSheet } from './types';
 
 const googleSheetId = process.env.GOOGLE_SHEET_ID; //Google Sheet ID
 
@@ -20,7 +20,10 @@ export async function getGoogleSheetsData(page_id: number) {
 }
 
 //Write google sheets data
-export async function addGoogleSheetsRow(row: watchListSheet[], page_id: number) {
+export async function addGoogleSheetsRow(
+    row: watchListSheet[],
+    page_id: number,
+) {
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -33,4 +36,24 @@ export async function addGoogleSheetsRow(row: watchListSheet[], page_id: number)
 
     const data = await sheet.addRows(row);
     return data;
+}
+
+//Write google sheets data
+export async function removeBillFromSheets(id: string) {
+    const doc = new GoogleSpreadsheet(googleSheetId);
+    await doc.useServiceAccountAuth({
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY,
+    });
+
+    await doc.loadInfo(); // loads document properties and worksheets
+
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+    for (const row of rows) {
+        if (row.legiscan_id == id) {
+            await row.delete();
+            return;
+        }
+    }
 }

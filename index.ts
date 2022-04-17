@@ -1,9 +1,23 @@
 const fs = require('fs'); //Read files
-import { watchListSheet, legislatureSheet, dataStore, bill, legiScanSearchResult } from "./src/types";
-import { legiScanSearchBill, legiScanSearchQuery, legiScanGetBill } from "./src/legiscan";
-import { getGoogleSheetsData, addGoogleSheetsRow } from "./src/sheets";
-import { chunkSubstr, getItemInArray } from "./src/utility";
-import { sendTweet } from "./src/twitter";
+import {
+    watchListSheet,
+    legislatureSheet,
+    dataStore,
+    bill,
+    legiScanSearchResult,
+} from './src/types';
+import {
+    legiScanSearchBill,
+    legiScanSearchQuery,
+    legiScanGetBill,
+} from './src/legiscan';
+import {
+    removeBillFromSheets,
+    getGoogleSheetsData,
+    addGoogleSheetsRow,
+} from './src/sheets';
+import { chunkSubstr, getItemInArray } from './src/utility';
+import { sendTweet } from './src/twitter';
 
 let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to save on api requests
 
@@ -34,7 +48,7 @@ let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to sa
 
 //Scrape data needed
 async function scrapeData() {
-    const watchList: string[] = fs.readFileSync('data/watchList.json');
+    const watchList: string[] = [];
     //Sets watchList to empty
     const watchListRow: watchListSheet[] = await getGoogleSheetsData(0);
     //Grabs all data from google sheets to add them to the watchlist
@@ -45,17 +59,28 @@ async function scrapeData() {
     //id, we can assume it's not on the watchlist. We then scrape the data and add it to the watchlist
     for (const row of watchListRow) {
         if (!row.legiscan_id) {
-            const legiScanData: legiScanSearchResult = await legiScanSearchBill(row.bill_id.split(' ')[0], row.bill_id.split(' ')[1]);
+            const legiScanData: legiScanSearchResult = (await legiScanSearchBill(
+                row.bill_id.split(' ')[0],
+                row.bill_id.split(' ')[1],
+            ));
             watchList.push(legiScanData.data.searchresult['0'].bill_id);
             fs.writeFileSync('data/watchList.json', JSON.stringify(watchList));
+        } else {
+            watchList.push(row.legiscan_id);
         }
     }
 
     console.log('Starting scrape');
 
     //Grab api results for 'transgender'
-    const searchResults: legiScanSearchResult = await legiScanSearchQuery("3", "all", "action:day AND ('transgender' OR ('biological' AND 'sex'))");
-    let customBills: number[] = JSON.parse(fs.readFileSync('data/watchList.json'));
+    const searchResults: legiScanSearchResult = await legiScanSearchQuery(
+        '3',
+        'all',
+        "action:day AND ('transgender' OR ('biological' AND 'sex'))",
+    );
+    let customBills: number[] = JSON.parse(
+        fs.readFileSync('data/watchList.json'),
+    );
 
     //Loop through results
     for (let i = 0; i < customBills.length - 1; i++) {
@@ -85,16 +110,24 @@ async function processBill(bill_id: number) {
 
     //Has bill already been tweeted?
     //Counts history in response and if history is the same as the data, it has already been tweeted
-    const currentBill: dataStore = getItemInArray(bills, 'id', legiscanResponse.bill_id)
-    if (currentBill.historyCount == String(Object.keys(legiscanResponse.history).length)) {
+    const currentBill: dataStore = getItemInArray(
+        bills,
+        'id',
+        legiscanResponse.bill_id,
+    );
+    if (
+        currentBill.historyCount ==
+        String(Object.keys(legiscanResponse.history).length)
+    ) {
         return false;
     }
-
 
     //Start generating tweet
     const historyId: number = Object.keys(legiscanResponse.history).length - 1;
     const votesId: number = Object.keys(legiscanResponse.votes).length - 1;
-    const legislature: legislatureSheet = await getLegislature(legiscanResponse.state);
+    const legislature: legislatureSheet = await getLegislature(
+        legiscanResponse.state,
+    );
 
     //Generate text intro
     const intro: string = `🏳️‍⚧️⚖️'${legiscanResponse.state} ${legiscanResponse.bill_number}'`;
@@ -105,7 +138,7 @@ async function processBill(bill_id: number) {
             status = ` has been introduced by ${legiscanResponse.sponsors[0].role}. ${legiscanResponse.sponsors[0].last_name}, (${legiscanResponse.sponsors[0].party})`;
             break;
         case 2:
-            status = ` has passed the ${legiscanResponse.history[historyId].chamber} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent} and now moves onto the [Senate/House].`;
+            status = ` has passed the ${legiscanResponse.history[historyId].chamber} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent}.`;
             break;
         case 3:
             status = ` has passed the ${legiscanResponse.history[historyId].chamber} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent} and moves to the desk of ${legislature.Governor}`;
@@ -121,6 +154,11 @@ async function processBill(bill_id: number) {
             break;
     }
 
+    //Remove from sheet if failed
+    if (legiscanResponse.status == 6) {
+        removeBillFromSheets(legiscanResponse.bill_id);
+    }
+
     //Generate title
     const title: string = `\n${currentBill.category}, ${status}`;
 
@@ -134,7 +172,9 @@ async function processBill(bill_id: number) {
 
     //Update bill status and history ready for save
     currentBill.status = String(legiscanResponse.status);
-    currentBill.historyCount = String(Object.keys(legiscanResponse.history).length,);
+    currentBill.historyCount = String(
+        Object.keys(legiscanResponse.history).length,
+    );
 
     //If bill is not already in data json, fill all data stores
     if (currentBill.id != String(legiscanResponse.bill_id)) {
@@ -189,7 +229,6 @@ function updateDataFromSheets(sheetsData: any[]) {
     }
     fs.writeFileSync('data/data.json', JSON.stringify(data));
 }
-
 
 async function getLegislature(id: string) {
     const legislatures = await getGoogleSheetsData(1);
