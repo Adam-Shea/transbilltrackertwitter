@@ -153,4 +153,5 @@ export type legiScanSearchResult = {
             },
         ];
     };
+    statusText: string;
 };
