@@ -11,7 +11,10 @@ export type legislatureSheet = {
     House: string;
     Senate: string;
     Governor: string;
+    "End of Legislative Session": string;
+    Short: string;
     'Representative Contact Link': string;
+    End_of_Legislative_Session: string;
 };
 
 export type dataStore = {

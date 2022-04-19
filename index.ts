@@ -43,6 +43,7 @@ let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to sa
                 }, 720 * 60000);
             }, 240 * 60000);
         }, 240 * 60000);
+        processEndingSessions();
     }, 1440 * 60000);
 })();
 
@@ -130,7 +131,7 @@ async function processBill(bill_id: number) {
     );
 
     //Generate text intro
-    const intro: string = `🏳️‍⚧️⚖️'${legiscanResponse.state} ${legiscanResponse.bill_number}'`;
+    const intro: string = `🏳️‍⚧️⚖️ ${legiscanResponse.state} ${legiscanResponse.bill_number}`;
 
     let status: string = '';
     switch (legiscanResponse.status) {
@@ -150,7 +151,7 @@ async function processBill(bill_id: number) {
             status = ` has been vetoed by ${legislature.Governor}`;
             break;
         case 6:
-            status = ` Failed`;
+            status = ` has failed. Link to bill below for more infomation.`;
             break;
     }
 
@@ -160,12 +161,12 @@ async function processBill(bill_id: number) {
     }
 
     //Generate title
-    const title: string = `\n${currentBill.category}, ${status}`;
+    const title: string = `, ${currentBill.category}, ${status}`;
 
     //Generate description
-    const description: string = '\n' + currentBill.description;
+    const description: string = '\n\n' + currentBill.description;
 
-    const link: string = `${legiscanResponse.state_link}`;
+    const link: string = `Link to bill: https://legiscan.com/${legiscanResponse.state}/${legiscanResponse.bill_number}/${legiscanResponse.session.year_start}`;
 
     //Write relevant data about bill to json
     //Create JSON data
@@ -209,7 +210,7 @@ async function processBill(bill_id: number) {
     //Tweet
     const tweetData: string[] = chunkSubstr(intro + title + description, 275);
     tweetData.push(
-        `${legislature.House}\n${legislature.Senate}\n${legislature.Governor}\n${legislature['Representative Contact Link']}`,
+        `${legiscanResponse.state} House: ${legislature.House}\n${legiscanResponse.state} Senate: ${legislature.Senate}\n${legiscanResponse.state} Governor: ${legislature.Governor}\n${legislature['Representative Contact Link']}`,
     );
 
     tweetData.push(link);
@@ -252,4 +253,28 @@ async function getLegislature(id: string) {
         Short: '',
         State: '',
     };
+}
+
+
+async function processEndingSessions() {
+    const legislatureData: legislatureSheet[] = await getGoogleSheetsData(1);
+    const watchList: watchListSheet[] = await getGoogleSheetsData(0);
+    let testDate: any = new Date();
+    // add a day
+    testDate.setDate(testDate.getDate() - 1);
+    for (const state of legislatureData) {
+        const legisDate = new Date(state["End of Legislative Session"])
+        console.log(legisDate)
+        if ((testDate.getDay() == legisDate.getDay()) && (testDate.getMonth() == legisDate.getMonth()) && (testDate.getFullYear() == legisDate.getFullYear())) {
+            let tweetList: string = `The ${state.State} Legislative Session has ended. The following bills have failed to pass in time : \n`
+            for (const bill of watchList) {
+                if (bill.bill_id.split(" ")[0] == state.Short) {
+                    tweetList += `\n${bill.bill_id}, ${bill.description}`
+                }
+            }
+            const tweetData: string[] = chunkSubstr(tweetList, 275);
+            sendTweet(tweetData);
+        }
+    }
+
 }
