@@ -216,7 +216,7 @@ async function processBill(bill_id: number) {
     tweetData.push(link);
 
     if (currentBill.description != "" && currentBill.category != "") {
-        //sendTweet(tweetData);
+        sendTweet(tweetData);
     } else {
         //sendMessage(, "test")
     }
