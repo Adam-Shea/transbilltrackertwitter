@@ -166,7 +166,7 @@ async function processBill(bill_id: number) {
     //Generate description
     const description: string = '\n\n' + currentBill.description;
 
-    const link: string = `Link to bill: https://legiscan.com/${legiscanResponse.state}/${legiscanResponse.bill_number}/${legiscanResponse.session.year_start}`;
+    const link: string = `Link to bill: https://legiscan.com/${legiscanResponse.state}/bill/${legiscanResponse.bill_number}/${legiscanResponse.session.year_start}`;
 
     //Write relevant data about bill to json
     //Create JSON data
@@ -216,7 +216,7 @@ async function processBill(bill_id: number) {
     tweetData.push(link);
 
     if (currentBill.description != "" && currentBill.category != "") {
-        sendTweet(tweetData);
+        //sendTweet(tweetData);
     } else {
         //sendMessage(, "test")
     }
@@ -270,11 +270,11 @@ async function processEndingSessions() {
             for (const bill of watchList) {
                 if (bill.bill_id.split(" ")[0] == state.Short) {
                     tweetList += `\n${bill.bill_id}, ${bill.description}`
+                    removeBillFromSheets(bill.legiscan_id);
                 }
             }
             const tweetData: string[] = chunkSubstr(tweetList, 275);
             sendTweet(tweetData);
         }
     }
-
 }
