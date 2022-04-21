@@ -16,35 +16,21 @@ import {
     getGoogleSheetsData,
     addGoogleSheetsRow,
 } from './src/sheets';
+var CronJob = require('cron').CronJob;
 import { chunkSubstr, getItemInArray } from './src/utility';
 import { sendTweet, sendMessage } from './src/twitter';
 
 let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to save on api requests
-
 (async function () {
-    scrapeData();
-    setTimeout(function () {
+    scrapeData()
+    var scrape = new CronJob('0 0 9,12,17 * * MON,TUE,WED,THU,FRI', function () {
         scrapeData();
-        setTimeout(function () {
-            scrapeData();
-            setTimeout(function () {
-                scrapeData();
-            }, 720 * 60000);
-        }, 240 * 60000);
-    }, 240 * 60000);
-    setInterval(function () {
-        scrapeData();
-        setTimeout(function () {
-            scrapeData();
-            setTimeout(function () {
-                scrapeData();
-                setTimeout(function () {
-                    scrapeData();
-                }, 720 * 60000);
-            }, 240 * 60000);
-        }, 240 * 60000);
+    }, null, true, 'America/Boise');
+    scrape.start();
+    var endingSessions = new CronJob('0 0 12 * * *', function () {
         processEndingSessions();
-    }, 1440 * 60000);
+    }, null, true, 'America/Boise');
+    endingSessions.start();
 })();
 
 //Scrape data needed
@@ -71,7 +57,7 @@ async function scrapeData() {
         }
     }
 
-    console.log('Starting scrape');
+    console.log("Starting scrape at" + new Date().getTime());
 
     //Grab api results for 'transgender'
     const searchResults: legiScanSearchResult = await legiScanSearchQuery(
@@ -97,8 +83,8 @@ async function scrapeData() {
             await processBill(parseInt(searchResults.data.searchresult[i].bill_id));
         }
     }
-    console.log('Finished Scrape');
-    console.log('\n\n\n');
+    console.log("Finished scrape at " + new Date().getTime());
+    console.log('\n');
 
     addGoogleSheetsRow(saveToGoogleSheets, 0);
 }
@@ -216,7 +202,7 @@ async function processBill(bill_id: number) {
     tweetData.push(link);
 
     if (currentBill.description != "" && currentBill.category != "") {
-        sendTweet(tweetData);
+        //sendTweet(tweetData);
     } else {
         //sendMessage(, "test")
     }
@@ -257,6 +243,7 @@ async function getLegislature(id: string) {
 
 
 async function processEndingSessions() {
+    console.log("Started ending sessions process at " + new Date().getTime());
     const legislatureData: legislatureSheet[] = await getGoogleSheetsData(1);
     const watchList: watchListSheet[] = await getGoogleSheetsData(0);
     let testDate: any = new Date();
