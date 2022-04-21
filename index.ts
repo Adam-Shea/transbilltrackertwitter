@@ -22,6 +22,7 @@ import { sendTweet, sendMessage } from './src/twitter';
 
 let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to save on api requests
 (async function () {
+    scrapeData();
     var scrape = new CronJob('0 0 9,12,17 * * MON,TUE,WED,THU,FRI', function () {
         scrapeData();
     }, null, true, 'America/Boise');
@@ -49,7 +50,10 @@ async function scrapeData() {
                 row.bill_id.split(' ')[0],
                 row.bill_id.split(' ')[1],
             ));
-            watchList.push(legiScanData.data.searchresult['0'].bill_id);
+            // @ts-expect-error
+            if (legiScanData.data.searchresult['summary'].count > 0) {
+                watchList.push(legiScanData.data.searchresult['0'].bill_id);
+            }
             fs.writeFileSync('data/watchList.json', JSON.stringify(watchList));
         } else {
             watchList.push(row.legiscan_id);
@@ -201,7 +205,7 @@ async function processBill(bill_id: number) {
     tweetData.push(link);
 
     if (currentBill.description != "" && currentBill.category != "") {
-        //sendTweet(tweetData);
+        sendTweet(tweetData);
     } else {
         //sendMessage(, "test")
     }
