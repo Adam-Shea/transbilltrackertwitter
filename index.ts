@@ -117,8 +117,8 @@ async function processBill(bill_id: number) {
         legiscanResponse.bill_id,
     );
     if (
-        currentBill.historyCount ==
-        String(Object.keys(legiscanResponse.history).length)
+        currentBill.status ==
+        String(legiscanResponse.status)
     ) {
         return false;
     }
@@ -139,10 +139,10 @@ async function processBill(bill_id: number) {
             status = ` has been introduced by ${legiscanResponse.sponsors[0].role}. ${legiscanResponse.sponsors[0].last_name}, (${legiscanResponse.sponsors[0].party})`;
             break;
         case 2:
-            status = ` has passed the ${legiscanResponse.history[historyId].chamber} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent}.`;
+            status = ` has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent}.`;
             break;
         case 3:
-            status = ` has passed the ${legiscanResponse.history[historyId].chamber} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent} and moves to the desk of ${legislature.Governor}`;
+            status = ` has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent} and moves to the desk of ${legislature.Governor}`;
             break;
         case 4:
             status = ` has been signed by ${legislature.Governor} `;
