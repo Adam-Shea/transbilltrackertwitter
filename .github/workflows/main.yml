@@ -11,7 +11,7 @@ jobs:
         uses: Adzz/yarn_command_action@v2.0.0
         with:
           package-manager: npm
-          command: test
+          command: run test
   deploy:
     runs-on: ubuntu-latest
     steps:
