@@ -15,6 +15,7 @@ import {
     removeBillFromSheets,
     getGoogleSheetsData,
     addGoogleSheetsRow,
+    updateBillFromSheets,
 } from './src/sheets';
 var CronJob = require('cron').CronJob;
 import { chunkSubstr, getItemInArray } from './src/utility';
@@ -22,7 +23,6 @@ import { sendTweet, sendMessage } from './src/twitter';
 
 let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to save on api requests
 (async function () {
-    scrapeData();
     var scrape = new CronJob('0 0 9,12,17 * * MON,TUE,WED,THU,FRI,SAT,SUN', function () {
         scrapeData();
     }, null, true, 'America/Boise');
@@ -32,7 +32,7 @@ let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to sa
     }, null, true, 'America/Boise');
     endingSessions.start();
 })();
-
+//NEW COMMENT
 //Scrape data needed
 async function scrapeData() {
     const watchList: string[] = [];
@@ -53,6 +53,7 @@ async function scrapeData() {
             // @ts-expect-error
             if (legiScanData.data.searchresult['summary'].count > 0) {
                 watchList.push(legiScanData.data.searchresult['0'].bill_id);
+                updateBillFromSheets(row.bill_id, legiScanData.data.searchresult['0'].bill_id);
             }
             fs.writeFileSync('data/watchList.json', JSON.stringify(watchList));
         } else {
@@ -60,20 +61,20 @@ async function scrapeData() {
         }
     }
 
-    console.log("Starting scrape at" + new Date().getTime());
+    console.log("Starting scrape at " + new Date().getTime());
 
     //Grab api results for 'transgender'
     const searchResults: legiScanSearchResult = await legiScanSearchQuery(
         '3',
         'all',
-        "action:day AND ('transgender' OR ('biological' AND 'sex'))",
+        "action:day AND (transgender OR (gender AND affirming AND care) OR (biological AND sex))",
     );
     let customBills: number[] = JSON.parse(
         fs.readFileSync('data/watchList.json'),
     );
 
     //Loop through results
-    for (let i = 0; i < customBills.length - 1; i++) {
+    for (let i = 0; i < customBills.length; i++) {
         await processBill(customBills[i]);
     }
     for (
@@ -100,7 +101,7 @@ async function processBill(bill_id: number) {
 
     //Has bill already been tweeted?
     //Counts history in response and if history is the same as the data, it has already been tweeted
-    const currentBill: dataStore = getItemInArray(
+    var currentBill: dataStore = getItemInArray(
         bills,
         'id',
         legiscanResponse.bill_id,
@@ -125,7 +126,11 @@ async function processBill(bill_id: number) {
     let status: string = '';
     switch (legiscanResponse.status) {
         case 1:
-            status = ` has been introduced by ${legiscanResponse.sponsors[0].role}. ${legiscanResponse.sponsors[0].last_name}, (${legiscanResponse.sponsors[0].party})`;
+            if (legiscanResponse.sponsors.length > 0) {
+                status = ` has been introduced by ${legiscanResponse.sponsors[0].role}. ${legiscanResponse.sponsors[0].last_name}, (${legiscanResponse.sponsors[0].party})`;
+            } else {
+                status = ` has been introduced`
+            }
             break;
         case 2:
             status = ` has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent}.`;
@@ -160,12 +165,6 @@ async function processBill(bill_id: number) {
     //Write relevant data about bill to json
     //Create JSON data
 
-    //Update bill status and history ready for save
-    currentBill.status = String(legiscanResponse.status);
-    currentBill.historyCount = String(
-        Object.keys(legiscanResponse.history).length,
-    );
-
     //If bill is not already in data json, fill all data stores
     if (currentBill.id != String(legiscanResponse.bill_id)) {
         const jsonStoreData: dataStore = {
@@ -178,6 +177,7 @@ async function processBill(bill_id: number) {
         };
         //Write data to json
         bills.push(jsonStoreData);
+        currentBill = jsonStoreData;
 
         const sheetStoreData: watchListSheet = {
             legiscan_id: String(legiscanResponse.bill_id),
@@ -192,6 +192,13 @@ async function processBill(bill_id: number) {
         //Write data to sheets
         saveToGoogleSheets.push(sheetStoreData);
     }
+
+    //Update bill status and history ready for save
+    currentBill.status = String(legiscanResponse.status);
+    currentBill.historyCount = String(
+        Object.keys(legiscanResponse.history).length,
+    );
+
 
     //Save Json
     fs.writeFileSync('data/data.json', JSON.stringify(bills));
@@ -257,14 +264,19 @@ async function processEndingSessions() {
         console.log(legisDate)
         if ((testDate.getDay() == legisDate.getDay()) && (testDate.getMonth() == legisDate.getMonth()) && (testDate.getFullYear() == legisDate.getFullYear())) {
             let tweetList: string = `The ${state.State} Legislative Session has ended. The following bills have failed to pass in time : \n`
+            var billCount = 0;
             for (const bill of watchList) {
                 if (bill.bill_id.split(" ")[0] == state.Short) {
                     tweetList += `\n${bill.bill_id}, ${bill.description}`
+                    billCount++;
                     removeBillFromSheets(bill.legiscan_id);
                 }
             }
             const tweetData: string[] = chunkSubstr(tweetList, 275);
-            sendTweet(tweetData);
+            console.log(tweetData)
+            if (billCount > 0) {
+                sendTweet(tweetData);
+            }
         }
     }
 }

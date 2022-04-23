@@ -1,12 +1,8 @@
+const fastChunkString = require('fast-chunk-string');
+
 //Returns string split into array in chunks of size length
 export function chunkSubstr(str: string, size: number) {
-    const numChunks = Math.ceil(str.length / size);
-    const chunks = new Array(numChunks);
-
-    for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
-        chunks[i] = str.substr(o, size) + '...';
-    }
-
+    const chunks = fastChunkString(str, { size: size, unicodeAware: true });
     return chunks;
 }
 

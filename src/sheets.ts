@@ -57,3 +57,24 @@ export async function removeBillFromSheets(id: string) {
         }
     }
 }
+
+//Write google sheets data
+export async function updateBillFromSheets(bill_id: string, id: string) {
+    const doc = new GoogleSpreadsheet(googleSheetId);
+    await doc.useServiceAccountAuth({
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY,
+    });
+
+    await doc.loadInfo(); // loads document properties and worksheets
+
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+    for (const row of rows) {
+        if (row.bill_id == bill_id) {
+            row.legiscan_id = id;
+            await row.save();
+            return;
+        }
+    }
+}
