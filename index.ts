@@ -55,11 +55,12 @@ async function scrapeData() {
                 watchList.push(legiScanData.data.searchresult['0'].bill_id);
                 updateBillFromSheets(row.bill_id, legiScanData.data.searchresult['0'].bill_id);
             }
-            fs.writeFileSync('data/watchList.json', JSON.stringify(watchList));
         } else {
             watchList.push(row.legiscan_id);
         }
     }
+
+    fs.writeFileSync('data/watchList.json', JSON.stringify(watchList));
 
     console.log("Starting scrape at " + new Date().getTime());
 

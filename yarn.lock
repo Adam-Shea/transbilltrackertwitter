@@ -931,6 +931,13 @@
   "resolved" "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   "version" "0.2.3"
 
+"@dezren39/chunk-text@^2.3.12":
+  "integrity" "sha512-rB8B2Lxah7gMEqJ2Dp0dh4BZZLFmAsvHegp/LW23eAjO1T4fcCwLMIrai9IpcZnSQhwDXaJbz4h5kg6cBRznQg=="
+  "resolved" "https://registry.npmjs.org/@dezren39/chunk-text/-/chunk-text-2.3.12.tgz"
+  "version" "2.3.12"
+  dependencies:
+    "runes" "^0.4.3"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   "integrity" "sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ=="
   "resolved" "https://registry.npmjs.org/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz"
@@ -1574,6 +1581,13 @@
   "resolved" "https://registry.npmjs.org/char-regex/-/char-regex-1.0.2.tgz"
   "version" "1.0.2"
 
+"chunk-text@^2.0.1":
+  "integrity" "sha512-ER6TSpe2DT4wjOVOKJ3FFAYv7wE77HA/Ztz88Peiv3lq/2oVMsItYJJsVVI0xNZM8cdImOOTNqlw+LQz7gYdJg=="
+  "resolved" "https://registry.npmjs.org/chunk-text/-/chunk-text-2.0.1.tgz"
+  "version" "2.0.1"
+  dependencies:
+    "runes" "^0.4.3"
+
 "ci-info@^3.2.0":
   "integrity" "sha512-riT/3vI5YpVH6/qomlDnJow6TBee2PBKSEpx3O32EGPYbWGIRsIlGRms3Sm74wYE1JMo8RnO04Hb12+v1J5ICw=="
   "resolved" "https://registry.npmjs.org/ci-info/-/ci-info-3.3.0.tgz"
@@ -1980,11 +1994,6 @@
   "integrity" "sha512-pjzuKtY64GYfWizNAJ0fr9VqttZkNiK2iS430LtIHzjBEr6bX8Am2zm4sW4Ro5wjWW5cAlRL1qAMTcXbjNAO2Q=="
   "resolved" "https://registry.npmjs.org/get-package-type/-/get-package-type-0.1.0.tgz"
   "version" "0.1.0"
-
-"get-stdin@^5.0.1":
-  "integrity" "sha1-Ei4WFZHiH/TFJTAwVpPyDmOTo5g="
-  "resolved" "https://registry.npmjs.org/get-stdin/-/get-stdin-5.0.1.tgz"
-  "version" "5.0.1"
 
 "get-stream@^6.0.0":
   "integrity" "sha512-ts6Wi+2j3jQjqi70w5AlN8DFnkSwC+MqmxEzdEALB2qXZYV3X/b1CTfgPLGJNMeAWxdPfU8FO1ms3NUfaHCPYg=="
@@ -2831,11 +2840,6 @@
   dependencies:
     "brace-expansion" "^1.1.7"
 
-"minimist@^1.2.0":
-  "integrity" "sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q=="
-  "resolved" "https://registry.npmjs.org/minimist/-/minimist-1.2.6.tgz"
-  "version" "1.2.6"
-
 "moment-timezone@^0.5.x":
   "integrity" "sha512-3zAEHh2hKUs3EXLESx/wsgw6IQdusOT8Bxm3D9UrHPQR7zlMmzwybC8zHEM1tQ4LJwP7fcxrWr8tuBg05fFCbg=="
   "resolved" "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.34.tgz"
@@ -3231,14 +3235,6 @@
   "resolved" "https://registry.npmjs.org/source-map/-/source-map-0.7.3.tgz"
   "version" "0.7.3"
 
-"split-text-to-chunks@^1.0.0":
-  "integrity" "sha512-HLtEwXK/T4l7QZSJ/kOSsZC0o5e2Xg3GzKKFxm0ZexJXw0Bo4CaEl39l7MCSRHk9EOOL5jT8JIDjmhTtcoe6lQ=="
-  "resolved" "https://registry.npmjs.org/split-text-to-chunks/-/split-text-to-chunks-1.0.0.tgz"
-  "version" "1.0.0"
-  dependencies:
-    "get-stdin" "^5.0.1"
-    "minimist" "^1.2.0"
-
 "sprintf-js@~1.0.2":
   "integrity" "sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw="
   "resolved" "https://registry.npmjs.org/sprintf-js/-/sprintf-js-1.0.3.tgz"
@@ -3556,6 +3552,11 @@
   "resolved" "https://registry.npmjs.org/word-wrap/-/word-wrap-1.2.3.tgz"
   "version" "1.2.3"
 
+"wordwrapjs@^5.1.0":
+  "integrity" "sha512-JNjcULU2e4KJwUNv6CHgI46UvDGitb6dGryHajXTDiLgg1/RiGoPSDw4kZfYnwGtEXf2ZMeIewDQgFGzkCB2Sg=="
+  "resolved" "https://registry.npmjs.org/wordwrapjs/-/wordwrapjs-5.1.0.tgz"
+  "version" "5.1.0"
+
 "wrap-ansi@^7.0.0":
   "integrity" "sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q=="
   "resolved" "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz"
@@ -3564,6 +3565,11 @@
     "ansi-styles" "^4.0.0"
     "string-width" "^4.1.0"
     "strip-ansi" "^6.0.0"
+
+"wrap-text@^1.0.9":
+  "integrity" "sha512-NWfjspSgMDXQIMpKM56AwCQPI01OMFRYYJBh6dGNCfH7AOl+j/VqqbiopgJ4VuQfSluqLc+2ekqaPNpYAGZ/Vg=="
+  "resolved" "https://registry.npmjs.org/wrap-text/-/wrap-text-1.0.9.tgz"
+  "version" "1.0.9"
 
 "wrappy@1":
   "integrity" "sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8="
