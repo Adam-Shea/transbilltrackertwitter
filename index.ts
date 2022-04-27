@@ -22,6 +22,8 @@ import { chunkSubstr, getItemInArray } from './src/utility';
 import { sendTweet, sendMessage } from './src/twitter';
 
 let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to save on api requests
+scrapeData();
+processEndingSessions();
 (async function () {
     var scrape = new CronJob('0 0 9,12,17 * * MON,TUE,WED,THU,FRI,SAT,SUN', function () {
         scrapeData();
@@ -128,25 +130,25 @@ async function processBill(bill_id: number) {
     switch (legiscanResponse.status) {
         case 1:
             if (legiscanResponse.sponsors.length > 0) {
-                status = ` has been introduced by ${legiscanResponse.sponsors[0].role}. ${legiscanResponse.sponsors[0].last_name}, (${legiscanResponse.sponsors[0].party})`;
+                status = `has been introduced by ${legiscanResponse.sponsors[0].role}. ${legiscanResponse.sponsors[0].last_name}, (${legiscanResponse.sponsors[0].party})`;
             } else {
-                status = ` has been introduced`
+                status = `has been introduced`
             }
             break;
         case 2:
-            status = ` has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent}.`;
+            status = `has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent}.`;
             break;
         case 3:
-            status = ` has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent} and moves to the desk of ${legislature.Governor}`;
+            status = `has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent} and moves to the desk of ${legislature.Governor}`;
             break;
         case 4:
-            status = ` has been signed by ${legislature.Governor} `;
+            status = `has been signed by ${legislature.Governor} `;
             break;
         case 5:
-            status = ` has been vetoed by ${legislature.Governor}`;
+            status = `has been vetoed by ${legislature.Governor}`;
             break;
         case 6:
-            status = ` has failed. Link to bill below for more infomation.`;
+            status = `has failed. Link to bill below for more infomation.`;
             break;
     }
 
