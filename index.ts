@@ -23,7 +23,6 @@ import { sendTweet, sendMessage } from './src/twitter';
 
 let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to save on api requests
 (async function () {
-    scrapeData();
     var scrape = new CronJob('0 0 9,12,17 * * MON,TUE,WED,THU,FRI,SAT,SUN', function () {
         scrapeData();
     }, null, true, 'America/Boise');
