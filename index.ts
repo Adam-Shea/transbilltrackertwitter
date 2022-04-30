@@ -22,7 +22,22 @@ import { chunkSubstr, getItemInArray } from './src/utility';
 import { sendTweet, sendMessage } from './src/twitter';
 
 let saveToGoogleSheets: watchListSheet[] = []; //Global save to sheets var to save on api requests
+
+if (!fs.existsSync('data')) {
+    fs.mkdirSync('data');
+}
+if (!fs.existsSync('data/data.json')) {
+    fs.writeFileSync('data/data.json', '[]');
+}
+if (!fs.existsSync('data/watchList.json')) {
+    fs.writeFileSync('data/watchList.json', '[]');
+}
+
 (async function () {
+    if (process.env.NODE_ENV == "dev") {
+        scrapeData();
+        processEndingSessions();
+    }
     var scrape = new CronJob('0 0 9,12,17 * * MON,TUE,WED,THU,FRI,SAT,SUN', function () {
         scrapeData();
     }, null, true, 'America/Boise');
@@ -99,6 +114,7 @@ async function scrapeData() {
 async function processBill(bill_id: number) {
     //Grab stored data for use in avoiding duplicate tweets
     const legiscanResponse: bill = await legiScanGetBill(bill_id);
+
 
     let rawdata = fs.readFileSync('data/data.json');
 
