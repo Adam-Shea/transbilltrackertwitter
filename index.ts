@@ -34,7 +34,6 @@ if (!fs.existsSync('data/watchList.json')) {
 }
 
 (async function () {
-    processEndingSessions();
     if (process.env.NODE_ENV == "dev") {
         scrapeData();
         processEndingSessions();
