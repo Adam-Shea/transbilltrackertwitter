@@ -34,6 +34,7 @@ if (!fs.existsSync('data/watchList.json')) {
 }
 
 (async function () {
+    processEndingSessions();
     if (process.env.NODE_ENV == "dev") {
         scrapeData();
         processEndingSessions();
@@ -301,22 +302,22 @@ async function processEndingSessions() {
         const legisDate = new Date(state["End of Legislative Session"])
         console.log(legisDate)
         if ((testDate.getDay() == legisDate.getDay()) && (testDate.getMonth() == legisDate.getMonth()) && (testDate.getFullYear() == legisDate.getFullYear())) {
-            let tweetList: string[] = [`The ${state.State} Legislative Session has ended. The following bills have failed to pass in time : \n`]
+            let tweetList: string = `The ${state.State} Legislative Session has ended. The following bills have failed to pass in time : \n`
             var billCount = 0;
             for (const bill of watchList) {
                 if (bill.bill_id.split(" ")[0] == state.Short) {
-                    tweetList.push(`\n${bill.bill_id}, ${bill.description}`)
+                    tweetList += `\n${bill.bill_id}, ${bill.description}`
                     billCount++;
                     if (process.env.NODE_ENV == "prod") {
                         removeBillFromSheets(bill.legiscan_id);
                     }
                 }
             }
-            //const tweetData: string[] = chunkSubstr(tweetList, 275);
-            console.log(tweetList)
+            const tweetData: string[] = chunkSubstr(tweetList, 275);
+            console.log(tweetData)
             if (billCount > 0) {
                 if (process.env.NODE_ENV == "prod") {
-                    sendTweet(tweetList);
+                    sendTweet(tweetData);
                 }
             }
         }
