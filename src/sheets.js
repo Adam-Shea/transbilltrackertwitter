@@ -7,7 +7,7 @@ async function getGoogleSheetsData(page_id) {
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY,
+        private_key: JSON.parse(process.env.GOOGLE_PRIVATE_KEY).private_key,
     });
 
     await doc.loadInfo(); // loads document properties and worksheets
@@ -25,7 +25,7 @@ async function addGoogleSheetsRow(
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY,
+        private_key: JSON.parse(process.env.GOOGLE_PRIVATE_KEY).private_key,
     });
 
     await doc.loadInfo(); // loads document properties and worksheets
@@ -41,7 +41,7 @@ async function removeBillFromSheets(id) {
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY,
+        private_key: JSON.parse(process.env.GOOGLE_PRIVATE_KEY).private_key,
     });
 
     await doc.loadInfo(); // loads document properties and worksheets
@@ -61,7 +61,7 @@ async function updateBillFromSheets(bill_id, id) {
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY,
+        private_key: JSON.parse(process.env.GOOGLE_PRIVATE_KEY).private_key,
     });
 
     await doc.loadInfo(); // loads document properties and worksheets
