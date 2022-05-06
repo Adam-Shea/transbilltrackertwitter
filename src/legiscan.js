@@ -1,4 +1,3 @@
-require('dotenv').config();
 const axios = require('axios'); //Make rest requests
 
 const apiKeyLegiscan = process.env.API_KEY; //Legiscan api key

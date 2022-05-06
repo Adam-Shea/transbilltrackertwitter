@@ -1,4 +1,3 @@
-require('dotenv').config();
 const TwitterApi = require('twitter-api-v2').default;
 
 const client = new TwitterApi({

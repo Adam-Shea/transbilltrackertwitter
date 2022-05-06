@@ -1,4 +1,3 @@
-require('dotenv').config();
 const { GoogleSpreadsheet } = require('google-spreadsheet'); //Google Spreadsheet
 
 const googleSheetId = process.env.GOOGLE_SHEET_ID; //Google Sheet ID
