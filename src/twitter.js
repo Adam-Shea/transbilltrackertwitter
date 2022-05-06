@@ -9,13 +9,15 @@ const client = new TwitterApi({
     accessSecret: process.env.ACCESS_SECRET,
 });
 
-export function sendTweet(data: string[]) {
+function sendTweet(data) {
     client.readWrite.v1.tweetThread(data);
 }
 
-export function sendMessage(id: number, message: string) {
+function sendMessage(id, message) {
     client.v1.sendDm({
         recipient_id: id,
         text: message,
     });
 }
+
+module.exports = { sendTweet, sendMessage }

@@ -1,11 +1,10 @@
 require('dotenv').config();
 const { GoogleSpreadsheet } = require('google-spreadsheet'); //Google Spreadsheet
-import { watchListSheet } from './types';
 
 const googleSheetId = process.env.GOOGLE_SHEET_ID; //Google Sheet ID
 
 //Get google sheets data
-export async function getGoogleSheetsData(page_id: number) {
+async function getGoogleSheetsData(page_id) {
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -20,9 +19,9 @@ export async function getGoogleSheetsData(page_id: number) {
 }
 
 //Write google sheets data
-export async function addGoogleSheetsRow(
-    row: watchListSheet[],
-    page_id: number,
+async function addGoogleSheetsRow(
+    row,
+    page_id,
 ) {
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
@@ -39,7 +38,7 @@ export async function addGoogleSheetsRow(
 }
 
 //Write google sheets data
-export async function removeBillFromSheets(id: string) {
+async function removeBillFromSheets(id) {
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -59,7 +58,7 @@ export async function removeBillFromSheets(id: string) {
 }
 
 //Write google sheets data
-export async function updateBillFromSheets(bill_id: string, id: string) {
+async function updateBillFromSheets(bill_id, id) {
     const doc = new GoogleSpreadsheet(googleSheetId);
     await doc.useServiceAccountAuth({
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -78,3 +77,6 @@ export async function updateBillFromSheets(bill_id: string, id: string) {
         }
     }
 }
+
+
+module.exports = { getGoogleSheetsData, addGoogleSheetsRow, removeBillFromSheets, updateBillFromSheets }
