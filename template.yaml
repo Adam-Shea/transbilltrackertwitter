@@ -19,7 +19,7 @@ Resources:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
   # This is a Lambda function config associated with the source code: hello-from-lambda.js
-  helloFromLambdaFunction:
+  TrackTransBills:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
