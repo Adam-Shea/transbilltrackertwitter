@@ -65,7 +65,6 @@ async function scrapeData() {
                 row.bill_id.split(' ')[0],
                 row.bill_id.split(' ')[1],
             ));
-            // @ts-expect-error
             if (legiScanData.data.searchresult['summary'].count > 0) {
                 watchList.push(legiScanData.data.searchresult['0'].bill_id);
                 updateBillFromSheets(row.bill_id, legiScanData.data.searchresult['0'].bill_id);
@@ -121,7 +120,7 @@ async function processBill(bill_id: number) {
     let bills: dataStore[] = JSON.parse(rawdata);
 
     //Has bill already been tweeted?
-    //Counts history in response and if history is the same as the data, it has already been tweeted
+    //Counts status in response and if status is the same as the data, it has already been tweeted
     var currentBill: dataStore = getItemInArray(
         bills,
         'id',
@@ -142,7 +141,6 @@ async function processBill(bill_id: number) {
             description: '',
             category: '',
             status: String(legiscanResponse.status),
-            historyCount: String(Object.keys(legiscanResponse.history).length),
         };
         //Write data to json
         bills.push(jsonStoreData);
@@ -154,7 +152,7 @@ async function processBill(bill_id: number) {
                 String(legiscanResponse.state) +
                 ' ' +
                 String(legiscanResponse.bill_number),
-            link: String(legiscanResponse.state_link),
+            link: String(legiscanResponse.url),
             category: '',
             description: '',
         };
@@ -215,8 +213,8 @@ async function processBill(bill_id: number) {
             break;
     }
 
-    //Remove from sheet if failed
-    if (legiscanResponse.status == 6) {
+    //Remove from sheet if passed, vetoed, or failed
+    if (legiscanResponse.status == 4 || 5 || 6) {
         if (process.env.NODE_ENV == "prod") {
             removeBillFromSheets(legiscanResponse.bill_id);
         }
@@ -233,11 +231,8 @@ async function processBill(bill_id: number) {
     //Write relevant data about bill to json
     //Create JSON data
 
-    //Update bill status and history ready for save
+    //Update bill status ready for save
     currentBill.status = String(legiscanResponse.status);
-    currentBill.historyCount = String(
-        Object.keys(legiscanResponse.history).length,
-    );
 
     //Tweet
     const tweetData: string[] = chunkSubstr(intro + title + description, 275);
@@ -247,7 +242,7 @@ async function processBill(bill_id: number) {
 
     tweetData.push(link);
 
-    if (currentBill.description != "" && currentBill.category != "") {
+    if (currentBill.description != undefined && currentBill.category != undefined) {
         if (process.env.NODE_ENV == "prod") {
             sendTweet(tweetData);
         }
@@ -301,22 +296,39 @@ async function processEndingSessions() {
         const legisDate = new Date(state["End of Legislative Session"])
         console.log(legisDate)
         if ((testDate.getDay() == legisDate.getDay()) && (testDate.getMonth() == legisDate.getMonth()) && (testDate.getFullYear() == legisDate.getFullYear())) {
-            let tweetList: string = `The ${state.State} Legislative Session has ended. The following bills have failed to pass in time : \n`
             var billCount = 0;
+            var tweetList = [];
+
+            //Set up Initial tweet with intro text
+            var currentTweet = `🏳️‍⚧️⚖️ The ${state.State} Legislative Session has ended. The following bills have failed to pass in time: \n`;
             for (const bill of watchList) {
                 if (bill.bill_id.split(" ")[0] == state.Short) {
-                    tweetList += `\n${bill.bill_id}, ${bill.description}`
                     billCount++;
+                    var billText = `\n${bill.bill_id}, ${bill.description}
+                    \n`;
+
+                    //New bill is too long, needs to start a fresh reply, so push currentTweet and start new reply
+                    if ((currentTweet.length + billText.length) > 275) {
+                        tweetList.push(currentTweet);
+                        currentTweet = '';
+                    }
+
+                    //if it fits, add bill to currentTweet
+                    currentTweet += billText;
+
                     if (process.env.NODE_ENV == "prod") {
                         removeBillFromSheets(bill.legiscan_id);
                     }
                 }
             }
-            const tweetData: string[] = chunkSubstr(tweetList, 275);
-            console.log(tweetData)
+            
+            if (currentTweet.length > 0) {
+                tweetList.push(currentTweet);
+            }
+            console.log(tweetList)
             if (billCount > 0) {
                 if (process.env.NODE_ENV == "prod") {
-                    sendTweet(tweetData);
+                    sendTweet(tweetList);
                 }
             }
         }

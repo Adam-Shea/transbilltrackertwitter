@@ -23,14 +23,13 @@ export type dataStore = {
     description: string;
     category: string;
     status: string;
-    historyCount: string;
 };
 
 export type bill = {
     bill_id: string;
     bill_number: string;
     state: string;
-    state_link: string;
+    url: string;
     status: number;
     title: string;
     category: string;
