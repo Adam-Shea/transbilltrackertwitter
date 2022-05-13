@@ -65,6 +65,7 @@ async function scrapeData() {
                 row.bill_id.split(' ')[0],
                 row.bill_id.split(' ')[1],
             ));
+            // @ts-ignore
             if (legiScanData.data.searchresult['summary'].count > 0) {
                 watchList.push(legiScanData.data.searchresult['0'].bill_id);
                 updateBillFromSheets(row.bill_id, legiScanData.data.searchresult['0'].bill_id);
@@ -321,7 +322,7 @@ async function processEndingSessions() {
                     }
                 }
             }
-            
+
             if (currentTweet.length > 0) {
                 tweetList.push(currentTweet);
             }
