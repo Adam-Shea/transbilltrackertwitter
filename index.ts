@@ -34,17 +34,29 @@ if (!fs.existsSync('data/watchList.json')) {
 }
 
 (async function () {
-    if (process.env.NODE_ENV == "dev") {
+    if (process.env.NODE_ENV == 'dev') {
         scrapeData();
         processEndingSessions();
     }
-    var scrape = new CronJob('0 0 9,12,17 * * MON,TUE,WED,THU,FRI,SAT,SUN', function () {
-        scrapeData();
-    }, null, true, 'America/Boise');
+    var scrape = new CronJob(
+        '0 0 9,12,17 * * MON,TUE,WED,THU,FRI,SAT,SUN',
+        function () {
+            scrapeData();
+        },
+        null,
+        true,
+        'America/Boise',
+    );
     scrape.start();
-    var endingSessions = new CronJob('0 0 12 * * *', function () {
-        processEndingSessions();
-    }, null, true, 'America/Boise');
+    var endingSessions = new CronJob(
+        '0 0 12 * * *',
+        function () {
+            processEndingSessions();
+        },
+        null,
+        true,
+        'America/Boise',
+    );
     endingSessions.start();
 })();
 //NEW COMMENT
@@ -61,14 +73,17 @@ async function scrapeData() {
     //id, we can assume it's not on the watchlist. We then scrape the data and add it to the watchlist
     for (const row of watchListRow) {
         if (!row.legiscan_id) {
-            const legiScanData: legiScanSearchResult = (await legiScanSearchBill(
+            const legiScanData: legiScanSearchResult = await legiScanSearchBill(
                 row.bill_id.split(' ')[0],
                 row.bill_id.split(' ')[1],
-            ));
+            );
             // @ts-ignore
             if (legiScanData.data.searchresult['summary'].count > 0) {
                 watchList.push(legiScanData.data.searchresult['0'].bill_id);
-                updateBillFromSheets(row.bill_id, legiScanData.data.searchresult['0'].bill_id);
+                updateBillFromSheets(
+                    row.bill_id,
+                    legiScanData.data.searchresult['0'].bill_id,
+                );
             }
         } else {
             watchList.push(row.legiscan_id);
@@ -77,13 +92,13 @@ async function scrapeData() {
 
     fs.writeFileSync('data/watchList.json', JSON.stringify(watchList));
 
-    console.log("Starting scrape at " + new Date().getTime());
+    console.log('Starting scrape at ' + new Date().getTime());
 
     //Grab api results for 'transgender'
     const searchResults: legiScanSearchResult = await legiScanSearchQuery(
         '3',
         'all',
-        "action:day AND (transgender OR (gender AND affirming AND care) OR (biological AND sex))",
+        'action:day AND (transgender OR (gender AND affirming AND care) OR (biological AND sex))',
     );
     let customBills: number[] = JSON.parse(
         fs.readFileSync('data/watchList.json'),
@@ -103,10 +118,10 @@ async function scrapeData() {
             await processBill(parseInt(searchResults.data.searchresult[i].bill_id));
         }
     }
-    console.log("Finished scrape at " + new Date().getTime());
+    console.log('Finished scrape at ' + new Date().getTime());
     console.log('\n');
 
-    if (process.env.NODE_ENV == "prod") {
+    if (process.env.NODE_ENV == 'prod') {
         addGoogleSheetsRow(saveToGoogleSheets, 0);
     }
 }
@@ -114,7 +129,6 @@ async function scrapeData() {
 async function processBill(bill_id: number) {
     //Grab stored data for use in avoiding duplicate tweets
     const legiscanResponse: bill = await legiScanGetBill(bill_id);
-
 
     let rawdata = fs.readFileSync('data/data.json');
 
@@ -127,10 +141,7 @@ async function processBill(bill_id: number) {
         'id',
         legiscanResponse.bill_id,
     );
-    if (
-        currentBill.status ==
-        String(legiscanResponse.status)
-    ) {
+    if (currentBill.status == String(legiscanResponse.status)) {
         return false;
     }
 
@@ -158,25 +169,21 @@ async function processBill(bill_id: number) {
             description: '',
         };
         //Write data to sheets
-        if (process.env.NODE_ENV == "prod") {
+        if (process.env.NODE_ENV == 'prod') {
             saveToGoogleSheets.push(sheetStoreData);
         }
         //Save Json
         await fs.writeFileSync('data/data.json', JSON.stringify(bills));
     }
 
-    if (currentBill.description == "" || currentBill.category == "") {
+    if (currentBill.description == '' || currentBill.category == '') {
         const watchListRow: watchListSheet[] = await getGoogleSheetsData(0);
         await updateDataFromSheets(watchListRow);
         rawdata = await fs.readFileSync('data/data.json');
         bills = JSON.parse(rawdata);
-        currentBill = getItemInArray(
-            bills,
-            'id',
-            legiscanResponse.bill_id,
-        );
-    }
 
+        currentBill = getItemInArray(bills, 'id', legiscanResponse.bill_id);
+    }
 
     //Start generating tweet
     const historyId: number = Object.keys(legiscanResponse.history).length - 1;
@@ -194,14 +201,19 @@ async function processBill(bill_id: number) {
             if (legiscanResponse.sponsors.length > 0) {
                 status = `has been introduced by ${legiscanResponse.sponsors[0].role}. ${legiscanResponse.sponsors[0].last_name}, (${legiscanResponse.sponsors[0].party})`;
             } else {
-                status = `has been introduced`
+                status = `has been introduced`;
             }
             break;
         case 2:
-            status = `has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent}.`;
+            status = `has passed the ${legiscanResponse.history[historyId].chamber == 'H' ? 'House' : 'Senate'
+                } by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay
+                }-${legiscanResponse.votes[votesId].absent}.`;
             break;
         case 3:
-            status = `has passed the ${legiscanResponse.history[historyId].chamber == "H" ? "House" : "Senate"} by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay}-${legiscanResponse.votes[votesId].absent} and moves to the desk of ${legislature.Governor}`;
+            status = `has passed the ${legiscanResponse.history[historyId].chamber == 'H' ? 'House' : 'Senate'
+                } by a vote of ${legiscanResponse.votes[votesId].yea}-${legiscanResponse.votes[votesId].nay
+                }-${legiscanResponse.votes[votesId].absent} and moves to the desk of ${legislature.Governor
+                }`;
             break;
         case 4:
             status = `has been signed by ${legislature.Governor} `;
@@ -216,7 +228,7 @@ async function processBill(bill_id: number) {
 
     //Remove from sheet if passed, vetoed, or failed
     if (legiscanResponse.status == 4 || 5 || 6) {
-        if (process.env.NODE_ENV == "prod") {
+        if (process.env.NODE_ENV == 'prod') {
             removeBillFromSheets(legiscanResponse.bill_id);
         }
     }
@@ -234,6 +246,7 @@ async function processBill(bill_id: number) {
 
     //Update bill status ready for save
     currentBill.status = String(legiscanResponse.status);
+    updateBillInData(bills, legiscanResponse.bill_id, currentBill.status)
 
     //Tweet
     const tweetData: string[] = chunkSubstr(intro + title + description, 275);
@@ -243,8 +256,11 @@ async function processBill(bill_id: number) {
 
     tweetData.push(link);
 
-    if (currentBill.description != undefined && currentBill.category != undefined) {
-        if (process.env.NODE_ENV == "prod") {
+    if (
+        currentBill.description != undefined &&
+        currentBill.category != undefined
+    ) {
+        if (process.env.NODE_ENV == 'prod') {
             sendTweet(tweetData);
         }
     } else {
@@ -285,31 +301,34 @@ async function getLegislature(id: string) {
     };
 }
 
-
 async function processEndingSessions() {
-    console.log("Started ending sessions process at " + new Date().getTime());
+    console.log('Started ending sessions process at ' + new Date().getTime());
     const legislatureData: legislatureSheet[] = await getGoogleSheetsData(1);
     const watchList: watchListSheet[] = await getGoogleSheetsData(0);
     let testDate: any = new Date();
     // add a day
     testDate.setDate(testDate.getDate() - 1);
     for (const state of legislatureData) {
-        const legisDate = new Date(state["End of Legislative Session"])
-        console.log(legisDate)
-        if ((testDate.getDay() == legisDate.getDay()) && (testDate.getMonth() == legisDate.getMonth()) && (testDate.getFullYear() == legisDate.getFullYear())) {
+        const legisDate = new Date(state['End of Legislative Session']);
+        console.log(legisDate);
+        if (
+            testDate.getDay() == legisDate.getDay() &&
+            testDate.getMonth() == legisDate.getMonth() &&
+            testDate.getFullYear() == legisDate.getFullYear()
+        ) {
             var billCount = 0;
             var tweetList = [];
 
             //Set up Initial tweet with intro text
             var currentTweet = `🏳️‍⚧️⚖️ The ${state.State} Legislative Session has ended. The following bills have failed to pass in time: \n`;
             for (const bill of watchList) {
-                if (bill.bill_id.split(" ")[0] == state.Short) {
+                if (bill.bill_id.split(' ')[0] == state.Short) {
                     billCount++;
                     var billText = `\n${bill.bill_id}, ${bill.description}
                     \n`;
 
                     //New bill is too long, needs to start a fresh reply, so push currentTweet and start new reply
-                    if ((currentTweet.length + billText.length) > 275) {
+                    if (currentTweet.length + billText.length > 275) {
                         tweetList.push(currentTweet);
                         currentTweet = '';
                     }
@@ -317,7 +336,7 @@ async function processEndingSessions() {
                     //if it fits, add bill to currentTweet
                     currentTweet += billText;
 
-                    if (process.env.NODE_ENV == "prod") {
+                    if (process.env.NODE_ENV == 'prod') {
                         removeBillFromSheets(bill.legiscan_id);
                     }
                 }
@@ -326,12 +345,23 @@ async function processEndingSessions() {
             if (currentTweet.length > 0) {
                 tweetList.push(currentTweet);
             }
-            console.log(tweetList)
+            console.log(tweetList);
             if (billCount > 0) {
-                if (process.env.NODE_ENV == "prod") {
+                if (process.env.NODE_ENV == 'prod') {
                     sendTweet(tweetList);
                 }
             }
         }
     }
+}
+
+function updateBillInData(array: any[], item: any, status: any) {
+    for (let i = 0; i < array.length; i++) {
+        if (array[i].id == item) {
+            array[i].status = status;
+            fs.writeFileSync('data/data.json', JSON.stringify(array));
+            return array[i];
+        }
+    }
+    return false
 }
