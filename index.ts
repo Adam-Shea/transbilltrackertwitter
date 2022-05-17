@@ -306,8 +306,6 @@ async function processEndingSessions() {
     const legislatureData: legislatureSheet[] = await getGoogleSheetsData(1);
     const watchList: watchListSheet[] = await getGoogleSheetsData(0);
     let testDate: any = new Date();
-    // add a day
-    testDate.setDate(testDate.getDate() - 1);
     for (const state of legislatureData) {
         const legisDate = new Date(state['End of Legislative Session']);
         console.log(legisDate);
