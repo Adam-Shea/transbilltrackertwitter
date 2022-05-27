@@ -334,9 +334,6 @@ async function processEndingSessions() {
                     //if it fits, add bill to currentTweet
                     currentTweet += billText;
 
-                    if (process.env.NODE_ENV == 'prod') {
-                        removeBillFromSheets(bill.legiscan_id);
-                    }
                 }
             }
 
