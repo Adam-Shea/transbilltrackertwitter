@@ -226,6 +226,10 @@ async function processBill(bill_id: number) {
             break;
     }
 
+    if(legiscanResponse.session.sine_die = 1) {
+        status = `has failed to pass in time. The ${legiscanResponse.state} legislative session adjourned sine die.`
+    }
+
     //Remove from sheet if passed, vetoed, or failed
     if (legiscanResponse.status == 4 || 5 || 6) {
         if (process.env.NODE_ENV == 'prod') {
@@ -299,55 +303,6 @@ async function getLegislature(id: string) {
         Short: '',
         State: '',
     };
-}
-
-async function processEndingSessions() {
-    console.log('Started ending sessions process at ' + new Date().getTime());
-    const legislatureData: legislatureSheet[] = await getGoogleSheetsData(1);
-    const watchList: watchListSheet[] = await getGoogleSheetsData(0);
-    let testDate: any = new Date();
-    for (const state of legislatureData) {
-        const legisDate = new Date(state['End of Legislative Session']);
-        console.log(legisDate);
-        if (
-            testDate.getDay() == legisDate.getDay() &&
-            testDate.getMonth() == legisDate.getMonth() &&
-            testDate.getFullYear() == legisDate.getFullYear()
-        ) {
-            var billCount = 0;
-            var tweetList = [];
-
-            //Set up Initial tweet with intro text
-            var currentTweet = `🏳️‍⚧️⚖️ The ${state.State} Legislative Session has ended. The following bills have failed to pass in time: \n`;
-            for (const bill of watchList) {
-                if (bill.bill_id.split(' ')[0] == state.Short) {
-                    billCount++;
-                    var billText = `\n${bill.bill_id}, ${bill.description}
-                    \n`;
-
-                    //New bill is too long, needs to start a fresh reply, so push currentTweet and start new reply
-                    if (currentTweet.length + billText.length > 275) {
-                        tweetList.push(currentTweet);
-                        currentTweet = '';
-                    }
-
-                    //if it fits, add bill to currentTweet
-                    currentTweet += billText;
-
-                }
-            }
-
-            if (currentTweet.length > 0) {
-                tweetList.push(currentTweet);
-            }
-            console.log(tweetList);
-            if (billCount > 0) {
-                if (process.env.NODE_ENV == 'prod') {
-                    sendTweet(tweetList);
-                }
-            }
-        }
-    }
 }
 
 function updateBillInData(array: any[], item: any, status: any) {
