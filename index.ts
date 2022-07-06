@@ -36,7 +36,6 @@ if (!fs.existsSync('data/watchList.json')) {
 (async function () {
     if (process.env.NODE_ENV == 'dev') {
         scrapeData();
-        processEndingSessions();
     }
     var scrape = new CronJob(
         '0 0 9,12,17 * * MON,TUE,WED,THU,FRI,SAT,SUN',
@@ -51,7 +50,6 @@ if (!fs.existsSync('data/watchList.json')) {
     var endingSessions = new CronJob(
         '0 0 12 * * *',
         function () {
-            processEndingSessions();
         },
         null,
         true,
@@ -96,9 +94,9 @@ async function scrapeData() {
 
     //Grab api results for 'transgender'
     const searchResults: legiScanSearchResult = await legiScanSearchQuery(
-        '3',
+        '2',
         'all',
-        'action:day AND (transgender OR (gender AND affirming AND care) OR (biological AND sex))',
+        '(status:introduced OR status:engrossed OR status:enrolled) AND (transgender OR (gender NEAR affirming NEAR care) OR (biological NEAR sex))',
     );
     let customBills: number[] = JSON.parse(
         fs.readFileSync('data/watchList.json'),
