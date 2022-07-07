@@ -96,7 +96,7 @@ async function scrapeData() {
     const searchResults: legiScanSearchResult = await legiScanSearchQuery(
         '2',
         'all',
-        '(status:introduced OR status:engrossed OR status:enrolled) AND (transgender OR (gender NEAR affirming NEAR care) OR (biological NEAR sex))',
+        'transgender OR (gender NEAR affirming NEAR care) OR (biological NEAR sex)',
     );
     let customBills: number[] = JSON.parse(
         fs.readFileSync('data/watchList.json'),
